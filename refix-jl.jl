@@ -59,9 +59,21 @@ function print_key(f)
     println()
 end
 
+function shift_f(f,s)
+    g = Int64[]
+    for i in 1:length(f)
+        push!(g,f[i].jump_success)
+    end
+    g = circshift(g,s)
+    for i in 1:length(f)
+        f[i].jump_success = g[i]
+    end
+end
+    
 
 
-function encode(p,f,alph)
+function encode(p,q,alph)
+    f = deepcopy(q)
     c = ""
     s = 1
     while length(p) > 0
@@ -71,19 +83,22 @@ function encode(p,f,alph)
             L = length(f[s].write_success)
             p = p[l+1:end] 
             s = mod1(s+ f[s].jump_success,length(f))
-            f = circshift(f,s)
+            #print_key(f)
             #@printf("shifted by %d\n",s)
         else
             c *= f[s].write_failure
             L = length(f[s].write_failure)
             s = mod1(s + 1,length(f))
+            
         end
+        shift_f(f,s+1)
         #@printf("%d   p  == %s\n",s,p)     
     end
     c
 end
 
-function decode(c,f,alph)
+function decode(c,q,alph)
+    f = deepcopy(q)
     p = ""
     s = 1
     while length(c) > 0
@@ -93,13 +108,13 @@ function decode(c,f,alph)
             p *= f[s].try_consume
             L = length(f[s].try_consume)
             s = mod1( s + f[s].jump_success, length(f))
-            f = circshift(f,s)
             #@printf("shifted by %d\n",L)
         elseif startswith(c, f[s].write_failure)
             l = length(f[s].write_failure)
             c = c[l+1:end]
             s = mod1(s + 1,length(f))
         end
+        shift_f(f,s+1)
         #@printf("%d   p  == %s\n",s,p)     
     end
     p
@@ -111,26 +126,21 @@ end
 function demo()
     alph = "O|"
     #alph = "abcdefghijklmnopqrstuvwxyz"
-    f = random_key(52,alph,1)
+    f = random_key(11,alph,1)
     print_key(f)
     for i in 1:15
         p = random_word(alph,rand(2:7))
         c = encode(p,f,alph)
-        #c = reverse(c)
-        #c = encode(c,f,alph)
-        #c = reverse(c)
-
-        
+        c = reverse(c)
+        c = encode(c,f,alph)
+        c = reverse(c)     
         print(white(),"f( ",red())
         @printf("%-10s",p)
         print(white()," ) = ",yellow(), c, "\n")
-        #@printf("p = %s\n",p)
-        
-        #@printf("c = %s\n",c)
-        #d = reverse(c)
-        #d = decode(d,f,alph)
-        #d = reverse(d)
-        d = decode(c,f,alph)
+        d = reverse(c)
+        d = decode(d,f,alph)
+        d = reverse(d)
+        d = decode(d,f,alph)
         if p != d @printf("\nERROR\n") end
         #@printf("d = %s\n",d)
     end

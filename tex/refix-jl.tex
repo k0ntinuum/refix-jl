@@ -31,7 +31,7 @@
 {\setstretch{0.0}{
 
 \b{Refix} is a variant of Prefix. Instead of using modes which each contain their own prefix code, Refix uses mini-states which either consume or fail to consume a fixed pattern in the current symbol(s) of plain text. If the ministate finds its pattern, it consumes the this input pattern and writes out a success output pattern, jumping forward a fixed number of ministates to its next ministate. If the ministate fails to find its fixed pattern, it writes a failure output pattern. It then \q{falls through} to the next ministate in the key. 
-Note that the key is just a (circular) array of such ministates. 
+Note that the key is just a (circular) array of such ministates. The jumps on success are rotated independently of their associated patterns so that the key evolves as a function of the plaintext.
  
 
 
