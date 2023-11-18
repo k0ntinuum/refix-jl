@@ -18,8 +18,8 @@ function random_word(alph,l)
     string(join(rand(alph,l)))
 end
 
-function random_state(alph,max_len)
-    try_consume = random_word(alph,rand(1:3))
+function random_state(alph,max_len,con_len)
+    try_consume = random_word(alph,rand(1:con_len))
     @label try_again
     s = random_word(alph,rand(1:max_len))
     f = random_word(alph,rand(1:max_len))
@@ -27,9 +27,9 @@ function random_state(alph,max_len)
     State(try_consume,s,f, rand(1:9))
 end
 
-function random_key(n, alph, max_len)
+function random_key(n, alph, max_len,con_len)
     f = State[]
-    for i in 1:n push!(f, random_state(alph, max_len)) end
+    for i in 1:n push!(f, random_state(alph, max_len,con_len)) end
     for i in eachindex(alph)
         f[i].try_consume = alph[i:i]
     end
@@ -125,8 +125,9 @@ end
 
 function demo()
     alph = "O|"
+    con_len = 1
     #alph = "abcdefghijklmnopqrstuvwxyz"
-    f = random_key(11,alph,1)
+    f = random_key(23,alph,1, con_len)
     print_key(f)
     for i in 1:15
         p = random_word(alph,rand(2:7))
